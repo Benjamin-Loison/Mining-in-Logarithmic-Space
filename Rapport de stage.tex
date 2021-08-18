@@ -1,0 +1,238 @@
+%\documentclass[10pt,a4paper]{article}
+\documentclass[12pt,a4paper]{article}
+%\documentclass[11pt,a4paper]{article}
+
+%\usepackage[left=1cm, right=1cm, top=1cm, bottom=2cm]{geometry}
+\usepackage[margin=2cm]{geometry}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{calc}
+
+\newcommand{\source}[1]{\hyperlink{#1}{[#1]}}
+
+\newcommand{\defannexe}[3]{\hypertarget{#1}
+	{
+		\begin{figure}[H]
+			\caption{#3\\}
+			\includegraphics[width=\linewidth]{#2}
+		\end{figure}
+	}}
+
+\newcommand{\annexe}[2]{\hyperlink{#1}{[Figure #2]}}
+\newcommand{\defsourceURL}[2]{\hypertarget{#1}#1. #2\\}
+\newcommand{\defsource}[3]{\hypertarget{#1}#1. #3. #2\\} % .
+
+\begin{document}
+
+	\title{Amélioration du passage à l'échelle de l'espace pris par la blockchain Bitcoin} % Rapport de stage
+	% plus adéquat: Amélioration du passage à l'échelle de l'espace disque et de la bande passante utilisés par la blockchain Bitcoin
+	\author{Benjamin Loison}
+	\date{juin 2021}
+	\maketitle
+
+	%\setlength{\parindent}{0cm}
+	
+	\section{Résumé}
+	
+	Le concept des blockchains est récent en informatique, défini pour sa célèbre application dans Bitcoin par S. Nakamoto en 2008. Bitcoin étant une blockchain permettant des échanges de la monnaie virtuelle Bitcoin de manière décentralisée, c'est-à-dire sans intervention d'États ou de banques. Une des grandes difficultés pour les blockchains est le passage à l'échelle, c'est-à-dire le fait de maintenir la stabilité et une interaction aisée avec la blockchain même si le nombre d'utilisateurs augmente d'un ordre de grandeur. Dans le cas de Bitcoin afin de vérifier les transactions, les utilisateurs, appelés aussi noeuds, doivent vérifier que chaque transaction du réseau est correcte. Cependant pour ce faire ils doivent retracer la provenance de l'argent dans tout l'historique de Bitcoin qui pèse 358 Go. Cette quantité de données stockée de manière linéaire en l'utilisation de la blockchain en plus de ralentir l'initialisation des utilisateurs (qui doivent alors télécharger sur le réseau pair-à-pair Bitcoin l'intégralité de la blockchain), cela empêche les utilisateurs lambdas utilisant par exemple leur téléphone de vérifier le réseau.\\
+  Notre solution étant un cas particulier de l'article "Mining in Logarithmic Space", traitant les blockchains de manière générale, consiste à stocker uniquement un état courant vérifié du montant monétaire appartenant à chaque utilisateur. Cela permet de réduire la consommation en bande passante et aussi en stockage de 358 Go à 4.3 Go, bien que des solutions pour le stockage existe déjà. Effectivement un problème majeur pour quelqu'un voulant participer au protocole est l'initialisation. En pratique l'initialisation dure 10 jours avec une connexion fibre puisque le téléchargement de la blockchain de Bitcoin grâce aux noeuds est très lent, en plus des 358 Go que le noeud initialisant doit allouer pour conserver la blockchain de Bitcoin. Ces deux points découragent de nombreux amateurs, alors que justement Bitcoin se veut être une cryptomonnaie décentralisée sécurisée par la participation de tout le monde au protocole.\\
+	Dans le cas particulier de Bitcoin, si on implémente cette approche toute en conservant celle de l'ancien protocole en fonctionnement, on remarque que l'état courant du nouveau protocole n'est vérifié que par les noeuds exécutant le nouveau protocole. Cependant on pourra aussi remarquer que seul la dernière vérification est considérée dans notre approche et que puisque celle-ci est le fruit du concensus de la majorité des noeuds exécutant le nouveau protocole et que les noeuds déjà initialisés passant au nouveau protocole peuvent vérifier ce haché de manière indépendante, on peut espérer que notre contribution garantisse la correction des données partagées par la blockchain.\\
+	De cette manière si une telle approche était utilisée à l'initialisation des plus de 10 000 noeuds Bitcoin, on pourrait économiser plus de 3 500 To de bande passante et de stockage. Pour permettre aux nouveaux noeuds s'initialisant de bénéficier de cette initialisation rapide et légère il faudrait proposer une modification de Bitcoin Core implémentant notre approche et une modification d'un des logiciels utilisé pour miner du Bitcoin.
+	
+	\tableofcontents
+	
+	\newpage
+	
+	\section{Introduction} % contexte scientifique générale 
+	
+	Les blockchains, appelées aussi chaînes de blocs, est un concept récent en informatique, défini la première fois par sa célèbre application dans Bitcoin par S. Nakamoto en 2008 \source{1}. Bitcoin étant une blockchain permettant des échanges de la monnaie virtuelle Bitcoin de manière décentralisée, c'est-à-dire sans intervention d'États ou de banques. Lorsque l'on parle de décentralisation dans les réseaux informatique, cela signifie que ceux-ci n'utilisent pas le modèle maître-esclave très répandu comme lorsque l'on se connecte sur les serveurs de Google avec notre ordinateur par exemple mais un modèle de pair-à-pair, appelé aussi peer-to-peer, d'ordinateur à ordinateur. Il est intéressant de remarquer que les blockchains est un des rares domaines où la pratique a une avance importante sur la théorie, par exemple Bitcoin a été démontré sûr sous certaines conditions seulement en 2014 par Juan A. Garay \source{2}\\
+	Une des grandes difficultés pour les blockchains est le passage à l'échelle, c'est-à-dire le fait de maintenir la stabilité et une interaction aisée avec la blockchain même si le nombre d'utilisateurs augmente d'un ordre de grandeur. Dans le cas de Bitcoin afin de vérifier les transactions monétaires, que ce soit en tant que mineur (utilisateur sécurisant le réseau) ou en tant que noeud complet (utilisateur vérifiant le réseau), ceux-ci doivent vérifier que chaque transaction du réseau est légitime et correcte. Cependant pour ce faire ils doivent retracer la provenance de l'argent dans tout l'historique de Bitcoin qui pèse 358 Go actuellement en 2021 \source{3}. Cette quantité de données stockée de manière linéaire en l'utilisation de la blockchain, ralentit l'initialisation des mineurs et noeuds complets (qui doivent alors télécharger sur le réseau peer-to-peer Bitcoin l'intégralité de la blockchain), et donc empêche les utilisateurs lambdas utilisant par exemple leur téléphone de vérifier le réseau Bitcoin.\\ % could define légtitime et correcte
+	Une idée peut alors être de stocker uniquement un état courant, appelé aussi snapshot, vérifié du montant monétaire appartenant à chaque utilisateur. Ainsi au lieu de parcourir toute l'histoire de la provenance de l'argent, on peut simplement vérifier le solde du compte. Cela permet notamment de se débarasser de l'historique des transactions et donc de la majeur partie de la blockchain de Bitcoin tout en gardant un niveau de sécurité très élevé. Mes travaux se base sur cette idée ingénieuse de l'article "Mining in Logarithmic Space" \source{4} qui a toutefois très généraliste et que l'on va essayer d'appliquer à la blockchain de Bitcoin. Des problématiques supplémentaires émergent puisque par exemple cet article ne traite pas le cas d'une difficulté croissante pour les mineurs ce qui est le cas dans Bitcoin. En pratique après application numérique, on transformera la blockchain de Bitcoin de 358 Go à 4.27 Go, ce qui permet notamment alors à un téléphone moderne de vérifier aisément le réseau Bitcoin et permet dans le meilleur cas à un nouvel utilisateur de s'initialiser 84 fois plus rapidement.\\
+	Puisque effectivement en pratique jusqu'à maintenant les smartphones se basait sur la technique du Simple Payment Verification (SPV) qui consiste à dépendre de noeuds complets et d'avoir à attendre un certain nombre de confirmations dans la blockchain pour s'assurer que le paiement effectué depuis son smartphone est bien pris en compte pour de bon par le réseau.\\
+	
+	%\newpage
+	
+	%\tableofcontents
+	
+	\newpage
+	
+	\section{Fonctionnement de Bitcoin} % contexte scientifique spécifique, vérifiez de bien expliquer tous le vocabulaire utilisé ou de le définir juste à temps
+	
+	Une blockchain, appelé aussi en français chaîne de blocs, est une technologie de stockage permettant de distribuer une même base de données entre différents acteurs sans besoin d'un tiers de confiance a proprement parler. Les transactions, monétaires dans le cas de Bitcoin, sont émises à quelques noeuds complets de la blockchain et signées par les utilisateurs désirant effectué un virement éléctronique. On appelle noeud tout acteur du réseau participant à l'algorithme de concensus sur le registre publique des transactions monétaires qu'est Bitcoin.\\
+	Afin de sécuriser le réseau, les noeuds transmettent de proche en proche (sachant qu'un noeud est en général connecté à environ 10 autres noeuds) les transactions qu'ils reçoivent, à condition qu'elles soient légétimes et correctes. C'est-à-dire qu'il faut qu'elles soient respectivement bien émises par le dépositaire des fonds monétaires en jeu et que ces fonds monétaires existent bien en accord avec l'historique des transactions précédentes.\\
+	Afin de faire converger l'états des différentes bases de données des utilisateurs dûes aux transactions se propageant dans le réseau, une difficultée est établie par l'historique de la blockchain permettant à chacun d'essayer de résoudre un problème cryptographique de cette difficultée et en cas de réussite en premier peut propager la solution au problème cryptographique et l'état de sa base de donnée associée. Cette dernière est bien évidemment vérifiée par les autres noeuds la recevant. Les noeuds participants à ce problème cryptographique sont appelés des mineurs et ont une probabilité de succès proportionnelle à leur puissance de calcul. Le réseau est sécurisé puisque l'on fait l'hypothèse que la majorité de la puissance de calcul est honnête. Sachant que les mineurs sont incités à résoudre le problème cryptographique puisque une récompense d'un nombre fixé de Bitcoin leur sont accordés en cas de succès s'ils sont les premiers. De plus si un groupe d'utilisateurs regroupaient plus de la moitié de la puissance du calcul du réseau, ils n'auraient aucun intérêt à ne pas participer honnêtement sinon ils dévaloriseront leurs acquis en Bitcoin.\\% cela permet d'empêcher le double spending etc mais bon on est pas là pour faire un état exhaustif de comment tout marche, on explique la culture générale du domaine et les notions dont on a besoin
+	La difficulté étant déterminée pour qu'en moyenne le réseau résolve le problème cryptographique tous les 10 minutes. En moyenne tous les 10 minutes les transactions en attente sont donc "validés". Cependant cette validation peut être remise en question et on parle alors de bloc de transactions à une certaine profondeur. Si celle-ci est supérieure à 6, il est communément jugé que ce bloc ne pourra probabilistiquement plus être révoqué. Puisque effectivement si deux réponses au problème cryptographique posé sont trouvées à peu près en même temps, puisque les deux blocs de transactions sous-jacents peuvent être différents. On parle alors de fork. Il faut continuer l'algorithme de concensus et ne considérer pour le moment aucun des deux blocs mais attendre qu'une branche de blocs s'accumulant devienne "largement" plus longue que l'autre avec par exemple 6 blocs d'avance.\\ % pourrait être plus précis
+	La problématique pour des appareils légers tels que les téléphones est qu'ils ne peuvent pas stocker l'historique de Bitcoin et donc ne pas vérifier si le paiement qu'ils auraient pû effectuer est bien pris en compte ou non par le réseau. Pour ce faire ils utilisent la méthode SPV qui se base sur des noeuds complets qui leurs transmettent la profondeur du bloc dans lequel sont leurs transactions. %Pour ce faire ils se basent sur une autre hypothèse: parmi 10 noeuds un au moins est honnête ?
+		
+	% use fichesynth ?
+	\section{Déroulement} % contribution technique
+	
+	\subsection{L'idée principale de notre approche}
+	
+	% éviter de donner des noms alternatifs si ne les explique pas voire ne les utilise pas ? j'ai envie de dire pas grave puisque ces appelations peuvent justement dire quelque chose aux gens
+	% \source{3}, let's put the source only once sinon on pourrait le mettre partout
+	L'enjeu de mon stage était d'essayer de résoudre le problème du passage à l'échelle, du point de vue de l'espace disque et de la bande passante, d'une blockchain.\\
+	L'idée de l'article support du stage, "Mining in Logarithmic Space", est de ne conserver que l'état courant, appelé aussi set d'UTXO, et que certains blocs. Ces blocs sont sélectionnés car étant les plus récents pour chaque niveau de difficulté des hachés. Dans la suite lorsqu'on parle de haché, cela signifie le haché d'un bloc comme par exemple:\\ 00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048. Le problème cryptographique mentionné ci-dessus consiste à trouver un résultat par la fonction de hachage SHA256² commençant au minimum par un certain nombre de zéros (ici le haché commence par 8 zéros héxadécimaux). Une fonction de hachage prenant une suite de bits de taille aussi grande que l'on veut et donnant en sortie une suite de $l$ bits, 256 dans le cas de SHA-256, cette suite étant appelé un haché. L'idée des fonctions de hachage est par leur caractère aléatoire de faire une sorte de "résumé" des données mises en entrée de la fonction. Ces fonctions de hachage sont conçus pour ne permettre de remonter à un antécédant à partir d'une image seulement à l'aide la force brute. De cette manière le mineur fait de nombreuses tentatives pour faire un peu varier l'antécédant et donnant une image aléatoire par la fonction de hachage par définition de celle-ci. Ainsi chacun a une chance de miner un bloc qui correspond à sa puissance calculatoire. Cette preuve de travail est un moyen d'établir une sorte de démocratie dépendant de la puissance calculatoire de chacun sur internet. L'expression niveau de difficulté des hachés consiste à partitionner les hachés en fonction du nombre de zéros par lequels ils commencent exactement.\\ % I don't explain SHA-256² because i said it's a function SHA-256 so they know what it means
+	La preuve de travail qu'est la résolution du problème cryptographique, comme c'est le cas dans Bitcoin, permet d'appliquer l'idée de ce papier de référence et garantit une très grande sécurité puisque l'idée consiste à mettre l'état courant, appelé aussi set d'UTXO, dans les blocs et de cette manière un noeud souhaitant s'initialiser n'a qu'à prendre le set d'UTXO du 6ème bloc en partant de la fin. De plus cette approche prouve que le 6ème dernier bloc est bien celui-ci en remarquant que certains blocs ont un haché rares comparés aux autres, c'est-à-dire qu'en ayant un haché commençant par $n$ zéros héxadécimaux, on en déduit probabilistiquement parlant qu'il y a 16 blocs dont le hachés commencent par $n - 1$ zéros héxadécimaux et ainsi de suite.% aussi grande que celle d'attendre 6 blocs ? en quoi utiliser les blcos de haut niveau ?
+	
+	\subsection{Les atouts de notre approche}
+	
+	J'ai étudié dans un premier temps les atouts qu'apporterait l'application de l'approche de "Mining in Logarithmic Space" à la blockchain de Bitcoin. Il se font à 2 niveaux:\\
+	\begin{enumerate}
+	\item Pour les mineurs et noeuds complets: puisque l'initialisation se ferait en recevant et stockant environ que le set d'UTXO d'environ 4.24 Go de Bitcoin au lieu des 358 Go de la blockchain. Effectivement d'après le tableau page 9 \annexe{21}{1}, polylog($n$)$c$ + $k\delta$ est relativement négligeable devant $a$. Puisque $n$ vaut 695 590 \source{5}, $c$ vaut jusqu'à 97 octets, $k$ vaut 6, $\delta$ vaut entre 0 et 2 Mo \source{6} et $a$ vaut 4.24 Go. %et la blockchain de Bitcoin vaut 358 Go \source{5} %soit un gain d'un facteur 79.7 - moyen fan puisqu'on ne parle pas des blocs de piX % parle déjà quelque part du fait que j'ai mis 10 jours à télécharger la blockchain de Bitcoin ? % la référence est discutable
+	
+	\item Pour les smartphones utilisant SPV: ces noeuds légers peuvent facilement devenir des noeuds complets vu qu'un poids de 4.24 Go est supportable sur un smartphone contrairement aux 358 Go précédemment nécessaire. De cette manière un smartphone peut plus rapidement avoir confiance dans le fait que sa transaction soit bien inscrit dans la blockchain de Bitcoin et sa participation en tant que noeud complet permet aussi d'augmenter la sécurité du réseau. % could explain why
+	Miner avec un smartphone étant hors de propos.
+	\end{enumerate}
+	
+	\subsection{Les difficultés pour appliquer notre approche à Bitcoin}
+	
+	\subsubsection{Présentation des deux problèmes}
+	
+	\begin{enumerate}
+	\item La première des deux grandes problématiques dans le cas de Bitcoin est alors de gérer l'évolution de la target $T$. $T$ est une difficulté minimale, par exemple si $T$ est tel qu'un haché doit commencer par $n$ zéros alors un haché commençant par $n + 1$ zéros est aussi en-dessous de la difficulté $T$. % explain distinction zéros héxadécimaux/binaires ? or just use binaires everywhere ? ou expliquer que héxadécimaux moins précis ? % or just talk about zeros for giving the idea but in reality it's more a seuil which indeed consists of a lot of zeros at the start put not only
+	
+	Pour revenir au sujet de l'évolution de la target $T$, ce qui est le cas dan Bitcoin tous les 2 016 blocs, le paragraphe "Variable difficulty" page 31, les auteurs rappellent que la théorie de leur papier fonctionne à condition d'avoir une difficultée $T$ constante. Dans le cas d'une difficultée variable afin de garder la compression optimale qu'ils présentent, il faudrait adapter leur usage des preuves de l'article "The bitcoin backbone protocol: Analysis and applications" à celles de l'article "The bitcoin backbone protocol with chains of variable difficulty" \source{7}.\\ % pourrait mettre source ? comme pour le tableau dans les annexes ? - bof vu que je paraphrase
+	% quel multiplication maximale de la difficulté depuis le début ? - 25 046 487 590 083
+	%Entre deux changements de difficultée se déroule exactement 2 016 blocs dans Bitcoin. Sachant que la plus grande modification en valeur absolue de changement de difficultée a été de 302.22 \% le 16 juillet 2010 \source{7}, ce qui par l'histoire de Bitcoin ne peut pas comporter a priori plusieurs changements de difficultées. Effectivement . Il reste alors à traiter le cas d'une unique modification de difficultée.\\ % peut être mal expliqué - et le changement maximal est par un facteur 25 046 487 590 083 donc je crois que mon argument tombe
+	% TODO: explain what is T and how it is important in their paper - déjà expliquer dans "L'idée principale de notre approche à mon goût"
+	Puis après avoir lu ce dernier papier et réfléchis aux problématiques liées au changement de la difficulté $T$, j'ai réalisé que c'est beaucoup plus simple de prendre $T$ = $T_0$ avec $T_0$ la target initiale de la blockchain et donc la plus faible. Cela ne permetterait pas d'avoir la compression optimale de l'article mais cependant une suffisante. De plus $T$ ne peut pas descendre en-dessous de $T_0$ car les capacités calculatoires des ordinateurs augmentent: l'exigence calculatoire du protocole reste constante et le nombre de membres participant est croissant et donc la puissance calculatoire du réseau de la blockchain ne fait qu'augmenter. Ainsi il est impossible de descendre en dessous de $T_0$ et il y aurait surtout d'autres problématiques liées à un tel affaissement même dans le cas du protocle actuel de Bitoin.\\ % sure ? % ex ? - sure pas compression optimale ? % check dem cf 25/06/21 ? % do we care about annexe/source order ?
+	
+	\item La seconde principale problématique est la rétro-compatibilité, ainsi l'utiliation en même temps des noeuds du nouveau protocole comme de l'ancien ne doit pas être problématique. On parle alors de velvet fork. On pourrait par exemple dans le nouveau protocole s'identifier comme ayant le nouveau protocole auprès du noeud ainsi l'usage des nouvelles fonctionnalités comme l'envoi de la preuve $\Pi$, permettant l'initialisation rapide, serait possible. En pratique il faudrait rajouter les |log $n$| pointeurs dans les blocs comme dans la théorie. Dans celle-ci les auteurs définissent un ensemble de pointeurs appelé interlink set qui consiste à avoir les liens de chaque bloc de niveau $j$ aux blocs dernier blocs de chaque niveau inférieur à $j$ qui le précède chronologiquement \annexe{22}{2}.\\ % explain $\Pi$ and $C$
+	Cependant je m'en rendrai compte avec la spécification du format binaire des blocs que rajouter de la donnée dans ceux-ci est très complexe voire impossible car l'en-tête et le contenu de chaque bloc ne peut pas contenir de donnée additionnelle et que la taille de l'en-tête est fixée. Je pensais initialement faire un hard fork. Un hard fork contrairement à un velvet fork consiste à changer le protocole impliquant une impossibilité de la rétro-compatibilité. Ce hard fork aurait consister à inclure dans le bloc l'état courant, cela permettrai notamment d'envoyer le bloc sans l'état courant qu'il contient et que donc de cette manière avec le haché du bloc on pourrait prouver à un nouveau noeud en lui présentant un set d'UTXO ("qui n'est pas dans la chaîne de blocs") que celui-ci est correct. Cependant en plus du hard fork cassant la rétro-compatibilité, cela rendrait le hachage des blocs compliqués pour certains composants qui y sont dédiés comme les ASICs qui ne alors prendrait plus qu'environ 1 Mo en entrée de la fonction de hachage mais bien plusieurs Go à cause du set d'UTXO. % pourrait détailler niveau difficulté qui s'adapte tous les 2016 blocs mais aussi problèmatique pour rajouter des transactions à la volée % could explain l'appellation set d'UTXO
+	On pourrait alors inclure dans le bloc seulement le haché du set d'UTXO cependant le problème des ASICs nombreux dans le cas de Bitcoin demeure par exemple.
+	\end{enumerate}
+	
+	\subsubsection{Seul un hard fork pour appliquer la théorie ?}
+	
+	La théorie semble nécessiter un hard fork dans le cas de Bitcoin face à ce deuxième problème. Cependant je me suis rendu compte que si une implémentation était faite qui pourrait être utilisé en pratique, elle devrait être rétro-compatibile. Il ne fallait donc pas changer le format des blocs (de cette manière cela permet de garder la puissance de minage de Bitcoin). Il faut alors se baser sur d'autres hypothèses que l'on a, comme celle selon laquelle la majoritée des utilisateurs est honnête. On pourrait alors demander à l'entiereté du réseau le haché du set d'UTXO et ne demander son set d'UTXO qu'à un des noeuds ayant renvoyé le haché majoritaire (et bien évidemment le vérifier et si celui-ci ne correspond pas par la fonction de hachage au haché majoritaire on demande à un autre utilisateur). De cette manière les ASICs fonctionnent de manière identique à précédemment à part que leur initialisation peut être modifié. Le gros désavantage de cette méthode élégante est, à part le coût du réseau de demander à tout le monde (ce qui peut encore être raisonnable comparé à télécharger toute la blockchain, puisque effectivement un handshake TCP (utilisé dans Bitcoin) ne pèse que de l'ordre du Ko et qu'il n'y a que de l'ordre de 10 000 noeuds découverts \source{8}), est le fait que tant que peu de personnes donnent le haché du set d'UTXO le haché majoritaire n'est pas forcément celui réel du réseau. Cependant au fur et à mesure que les utilisateurs passent au nouveau protocole, ceux-ci vérifient le haché du nouveau protocole à l'aide des données qu'ils ont obtenus de l'ancien et peuvent par leur majorité "révoquer" l'ancien haché du set d'UTXO.\\ % de même pour la solution finale
+	Cependant la scalabilité d'initialisation réseau est discutable pour cette dernière idée puisque même si dans le meilleur scénario où l'on établit une connexion avec chacun directement (sans avoir à les découvrir), notre amélioration favoriserait l'agrandissement de ce même réseau et avec une complexité linéaire en le nombre de nouveaux utilisateurs, cette approche ne serait pas soutenable au long terme. Toutefois une approche probabiliste peut peut-être assurée un très haut pourcentage de certitude en ne contactant pas l'ensemble du réseau.\\
+De plus le set d'UTXO que l'on cherche à se procurer est de l'ordre de $k$ blocs dans la chaîne (il peut être de strictement plus de $k$ blocs si l'obtention du haché de tout le monde met plus de 10 minutes). Sachant que les autres noeuds peuvent assez facilement stocker de l'ordre des $k$ derniers blocs, toutefois chaque noeud déjà établi n'a pas forcément à avoir prêt à être envoyé le haché de chaque set d'UTXO associé à chaque bloc mais peut le déterminer facilement en faisant des retours en arrière avec la connaissance des blocs suivants à celui demandé et un haché du set d'UTXO d'un de ces blocs suivants. Dans le scénario d'une forte demande (chaque haché de bloc est demandé plus d'une fois), hacher pour chaque bloc son set d'UTXO et le stocker toutefois plus rapide.\\ % Bien que demander à tous les noeuds leur haché peut sembler acceptable. 
+
+Il reste le problème de conserver pour chaque bloc un pointeur vers les blocs qui le précède temporellement parlant pour chaque niveau de difficulté. Comme dit précédemment on ne peut pas intégrer cet ensemble de |log $n$| pointeurs dans les blocs, on pourrait cependant le générer à partir des informations déjà présentes dans Bitcoin. Effectivement chaque bloc fait référence au bloc qui le précède dans la chaîne de blocsn, pour chaque bloc on peut obtenir son haché à l'aide de la fonction de hachage et on peut télécharger de manière sûr comme le set d'UTXO l'ensemble des headers de la chaîne de blocs. Ainsi on a toutes les informations pour regénérer cet ensemble de pointeurs dont l'article support utilise. De plus on peut remarquer que la taille de tous les headers est très faible puisqu'ils ne pèsent qu'environ 62 Mo puisqu'il y a environ 700 000 blocs où chaque en-tête ne peut mesurer que jusqu'à 97 octets.\\ % chaque header de bloc, on peut vérifier leur authenticité avec le même procédé que pour le set d'UTXO en vérifiant que le haché global des headers des blocs précédents les $k$  est bien majoritaire au sein du réseau.\\ % l'heure de génération de chaque bloc est inscrite dans ceux-ci, - pas besoin semble t'il
+
+	\subsubsection{La solution finale: l'utilisation de la coinbase}
+
+	Mon encadrante m'a alors fait remarquer une solution plus élégante: seul un endroit permet de mettre un peu de données supplémentaires inutiles à l'ancien protocole: la coinbase. La coinbase est la transaction qui dans chaque bloc permet de récompenser monétairement le mineur l'ayant miné. Dans chaque transaction un script avec un langage défini par Bitcoin permet de procéder à des vérifications. Parmi les instructions de ce langage figure OP\_NOP qui ne fait rien \source{9}. Cependant on ne peut pas stocker beaucoup de données dans celle-ci. Néanmois en remarquant que l'ensemble des pointeurs de la théorie n'est pas nécessaire d'être stocké comme énoncé précédemment.% préciser comment % puisque effectivement chaque bloc contient déjà un pointeur vers le bloc qui le précède et le niveau d'un bloc est établi par son haché et donc à partir de tous les en-têtes de blocs on peut reformer l'interlink set
+	% compression du set d'UTXO en pratique ?
+	
+	\subsection{L'implémentation} % section discutable dans son rapport au titre
+	
+	A ce moment là nous étions incertains d'en pratique comment précisément leur implémentation fonctionnait et nous avons alors contacté par email les auteurs du papier sur lequel nous nous basions. Cependant nous avons reçu une réponse qu'après deux mois d'attente. Ce n'était pas tant un problème que ça car l'idée principale du papier comme quoi on peut utiliser les niveaux de difficultés des hachés pour prouver un travail effectué était l'idée maîtresse avec laquelle j'ai réfléchis comment précisément faire au niveau de l'implémentation. Avant de passer à une quelconque implémentation, j'ai fait quelques statistiques sur le nombre de hachés commençant par $n$ zéros héxadécimaux \annexe{23}{3}. On parle souvent des zéros héxadécimaux ou binaires débutant le haché pour s'imaginer la difficulté bien qu'en pratique une difficulté où le haché débute par 010 est plus difficile qu'une difficulté où le haché débute par 011, alors que le nombre de zéros débuttants ne varie pas. Par rapport à ces statistiques du nombre de blocs par niveau héxadécimale, je pensais tomber sur un arbre binaire complet mais en réalité c'est logique que ce ne soit pas le cas. Effectivement la majorité des mineurs sont arrivés plus tard lorsque la difficulté était "haute" vers le niveau de difficulté 18 et puisque la difficulté de Bitcoin a tendance depuis le début à ne faire que monter, on obtient ce résultat.\\
+Cela a été l'occasion pour moi aussi de me convaincre que je savais faire un programme analysant la blockchain Bitcoin que j'ai téléchargé avec Bitcoin Core en respectant le format binaire disponible en ligne. Après coup j'ai remarqué qu'en pratique les zéros binaires des hachés impliquent des zéros héxadécimaux tous les 4 bits et que donc les zéros binaires étaient plus précis \annexe{24}{4} %il me restait alors deux problèmes:
+	
+	% cf papers that I wrote to see if interesting things to notice here
+	
+	%\begin{enumerate}
+	%	\item D'une part l'enjeu est % déjà parlé abondamment avant
+	%\end{enumerate}
+	
+	\subsection{Les résultats}
+	
+	Après avoir implémenté et optimisé l'algorithme 1 de l'article support en C++, je l'ai éxécuté avec les blocs de Bitcoin de deux manières différentes:\\
+	\begin{enumerate}
+		\item en donnant d'un seul coup en entrée toute la chaîne des blocs de Bitcoin\\
+	  \item en donnant en entrée une chaîne vide et le premier bloc de Bitcoin puis la chaîne compressée résultante de cette fonction concaténée avec le deuxième bloc de Bitcoin et ainsi de suite sur l'ensemble des blocs de Bitcoin.\\
+	\end{enumerate}
+	
+	J'ai alors constaté que le théorème 3 était vérifié en pratique, ce qui était d'une importance cruciale pour que les noeuds complets de l'ancien protocole et ceux du nouveau est la même chaîne compressée après passage au nouveau protocole.\\
+	
+	La compression de toute la chaîne de blocs de Bitcoin résultant en une preuve pour l'initialisation rapide notée $\Pi = \pi\chi$ de 2 065 blocs qui après mesure individuelle pèse 0.96 Go. J'en ai fait une représentation vectorielle \annexe{25}{5}. On peut remarquer que les rectangles au début sont uniformes car la difficulté augmente et ce sont les plus récents $2*m$ (avec $m = 3*k$) blocs pour chaque niveau de difficulté. Puis plus récemment on remarque que les blocs de plus haut niveau de $\pi\chi$ apparaissent, sachant que ce plus haut niveau doit contenir au minimum $2*m$ blocs. Ce sont les blocs les plus rares car de plus haut niveau de difficulté $\ell$ que l'on observe en premier vers la fin car statistiquement ils sont plus vieux que les $2*m$ plus récents blocs de chaque niveau intermédiaire. Puis puisque les blocs de niveau $\ell - i$ (avec $i \leq \ell$) sont plus simple à miner et que dans $\pi\chi$ seul les $2*m$ plus récents on observe de descendant de niveau en niveau ce décalage temporel vers la droite, tout en étant entrelacé avec les blocs de niveau supérieur "par chance". Finalement à la toute fin on observe les $k$ derniers blocs de la blockchain qui ont été pris tels quels en accord avec l'algorithme 1. \annexe{26}{6}\\
+D'après \source{10} on en conclue que la théorie en pratique permet de convertir précisément les 354 Go en 4.27 (4.24 + 0.03) Go ce qui fait une différence de 349.73 Go. Cela revient à diviser la taille de la blockchain par un facteur 84.\\
+	
+	Sans compter les algorithmes Python et C++ qui prétraitent les blocs pour les lister avec l'heure à laquelle ils ont été générés, les fichiers de Bitcoin Core dans lequels ils sont stockés et où dans ceux-ci et aussi leurs hachés associés, mon implémentation fait 800 lignes et n'est pas particulièrement intéressant à être inclus dans ce rapport mais il est cependant disponible sur GitHub \source{11}. Toutefois je ferais remarquer que par le biais de macro permet de changer le mode de traitement: compression des blocs un par un ou compression de tous d'un seul coup. Pour distinguer les blocs les uns des autres j'ai seulement utilisé une référence au fichier Bitcoin Core où le bloc est inclus et où il est dans ce fichier.
+	
+	\subsection{Le travail restant à faire pour concrétiser cette approche}
+	
+	L'objectif est alors d'intégrer d'une certaine manière mon code à un logiciel de minage et de noeud complet afin de donner de potentiels outils aidant à l'exécution du protocole Bitcoin. Il faut alors en plus réussir à miner un bloc dans la blockchain officiel de Bitcoin pour intégrer notre transaction coinbase modifiée afin d'initialiser la nouvelle version du protocole et l'initialisation rapide permise par notre approche. Il faut donc essayer de contacter une mining pool qui pourrait nous y aider et contacter l'équipe de développement de Bitcoin pour leur faire savoir qu'une implémentation dans les logiciels reconnus dans le domaine de cette approche a été faite et que la théorie la supporte. Comme étape intermédiaire, il faudrait procéder de la même manière que sur la blockchain officielle de Bitcoin mais sur le réseau de test déjà existant de Bitcoin. Effectivement un tel réseau existe déjà et il ne nécessite pas la puissance d'une mining pool mais seulement celle d'un processeur pour effectuer nos tests d'intégrations.\\
+		
+	\section{Evaluation de la contribution technique} % évaluation de la contribution technique
+	
+	L'idée de réduire pour chaque utilisateur l'usage de la bande passante et de son disque dur d'environ 350 Go est séduisante puisqu'à l'échelle des plus de 10 000 noeuds de Bitcoin, cela représente environ 3 500 To. Cependant il faut être clair sur les avantages et désavantages de cette méthode à différents points de vue:
+	
+	\begin{enumerate}
+		\item pour les noeuds légers devenir des noeuds un peu plus lourds en téléchargeant et stockant 4.3 Go n'augmente pas leur rapidité de vérification puisqu'il faut dans tous les cas il faut attendre au moins 6 blocs après celui intégrant la transaction étudiée pour la considérée comme validée de façon permanente. Toutefois la sécurité de ceux faisant le pas permet d'une part d'augmenter la sécurité de Bitcoin en agissant comme des noeuds de vérification mais leurs permet aussi de ne pas à avoir à dépendre d'autres noeuds et cela contribut à un gain de sécurité.
+		\item pour les amateurs cela permet donc d'essayer de contribuer au protocole Bitcoin plus facilement puisqu'il faut télécharger beaucoup moins de données pour s'initialiser ce qui est long sur un tel réseau pair-à-pair.
+		\item avec notre approche chaque utilisateur n'a plus l'historique des transactions Bitcoin, cela peut être vu comme un point positif pour la réduction de l'espace de stockage et la bande passante mais cela peut rendre moins fiable le fait d'essayer de malgré tout téléchager cet historique en exécutant l'ancien protocole puisque moins d'utilisateurs font tourner celui-ci.
+		\item un des points négatifs les plus importants est qu'en cas de fork considéré résolu par certains car une des branches a une avance de 6 blocs, si l'autre branche arrive à reconcurrencer le fork et le gagner, les utilisateurs qui pensaient cette situation impossible ne pourront pas aisément revenir en arrière pour emprunter l'autre embranchement. Il est à remarquer ici qu'il y a eu quelques forks dans la blockchain de Bitcoin et théoriquement, bien que probabilisitiquement négligeable, une ancienne branche plus d'actualité pourrait concurrencer et gagner le fork avec la branche jusque là majoritaire. Il faudrait donc enregistrer tous les blocs des branches alternatives ou du moins les modifications par rapport au set d'UTXO avant l'embranchement cependant je n'ai pas eu le temps d'étudié cette possibilité. %Dans notre approche on ne peut pas conserver l'information des forks puisque cela impliquerait de conserver tous les blocs de chaque branche où de 
+	\end{enumerate}
+	
+	\section{Méta-information} % méta-information
+	
+	J'ai déjà eu une initiation aux thématiques de la cryptographie et blockchain lors de l'école d'été MathInFoly en 2019. C'est lors de ce stage que j'ai appris les fondamentaux et que j'ai développé l'envie d'approfondir ces sujets.\\
+	
+	Contrairement à de nombreux camarades, l'entièreté de mon stage a été effectué à distance à cause de la crise sanitaire actuelle.\\
+	Avant d'avoir choisi de manière définitive le sujet de stage avec mon encadrante, celle-ci m'a transmis 4 articles de recherche dans le domaine des blockchains, totalisant 65 pages (\source{12}, \source{13}, \source{14}, \source{15}). Ceux-ci m'ont permis de distinguer les différentes travaux de recherche qui peuvent être effectués: faire un cas général d'un cas particulier et inversement, faire des démonstrations incomplètes, avoir une idée nouvelle dans un domaine et voir où cela nous mène, approfondir des travaux déjà existants...\\
+
+	De plus la lecture de nombreux articles Wikipedia sur le domaine, de ses outils pour fonctionner à ses applications, afin de bien comprendre les enjeux, a bien dû me prendre quelques jours avant le début du stage de 6 semaines.\\% soit environ 14 \% du temps total de mon stage.\\
+	Après quelques articles l'idée de réduire le stockage local et la transmission totale de la blockchain afin de faciliter le passage à l'échelle des blockchains nous intéressait particulièrement.\\
+	
+	Durant mon stage mon encadrante m'a transmis 8 papiers de recherche totalisant 390 pages et j'ai pris l'initiative d'en lire un de plus de 30 pages afin que je comprenne bien ce domaine que sont les blockchains et plus précisément l'état de l'art de la thématique étudiée (\source{4}, \source{1}, \source{16}, \source{17}, \source{2}, \source{18}, \source{19}, \source{7}, \source{20}). Lire ces différents articles m'a pris la moitié d'une stage puisque lors de ces lectures j'arrivais à mieux cerner et trouver des solutions aux problèmes de l'application de "Mining in Logarithmic Space" au cas du Bitcoin.\\
+	
+	En parallèle de de ma réflexion sur l'approche théorique afin de réaliser des statistiques et préparer l'implémentation j'ai téléchargé l'entièreté de la blockchain de Bitcoin grâce au logiciel renommé dans le domaine Bitcoin Core et ce fut aussi l'occasion de remarquer la difficulté de devenir un noeud complet puisqu'effectivement le téléchargement à travers le réseau pair-à-pair de Bitcoin a nécessité 10 jours bien qu'ayant la fibre, comme quoi notre approche peut être utile.\\
+	Deux semaines après le début du stage, moi et mon encadrante n'arrivions pas à comprendre précisément si oui ou non la snapshot de l'état courant noté $a$ était dans chaque bloc. Nous ne comprennions pas non plus qu'est-ce que l'on envoyait, seulement le bloc ou le bloc accompagné de la snapshot, et qu'est-ce que l'on hachait précisément. On a alors pris l'initiative d'envoyer un email aux auteurs de l'article support du stage pour leur demander des précisions. L'attente de leur réponse n'ont pas mis en pause mes travaux cependant au bout de deux semaines je ne pensais plus recevoir une réponse. Toutefois après le stage, après deux mois d'attente, un des auteurs du papier a pris le temps de nous répondre. Cela ne changeait en réalité pas grand chose à notre solution technique.\\
+	
+	Bien que j'ai un peu programmé en Python, ou C++ dès que la tâche devenait lourde sans multithreading efficace et gestion précise de la mémoire, lors du stage afin d'obtenir des statistiques que l'on ne trouve pas facilement sur internet comme la répartition des hachés des blocs triés par le nombre de zéros héxadécimaux ou binaires ou le respect ou non en pratique de l'ordre chronologique de stockage des blocs, leurs tailles...\\
+	Cette programmation pour obtenir ces statistiques m'a pris peu de temps comparée à la dernière semaine du stage où après consultation groupée de mon encadrante et d'un de ses collègues effectuant des travaux pratiques à ses élèves sur la thématique des blockchains, nous avons décidé que j'allais d'implémenter notre approche dans le cas particulier de Bitcoin que l'on avait étudié et adapté du cas général du papier "Mining in Logarithmic Space". Plus particulièrement il fallait principalement implémenter l'algorithme 1 du papier en pratique et vérifier la véracité en pratique du théorème 3 qui consiste brièvement à vérifier que compresser chaque bloc et l'ajouter au compressé des blocs précédents est au final identique à la compression en un seul coup de l'entièreté des blocs. Ce n'était pas une tâche évidente car mon implémentation devait être particulièrement efficace pour compresser les 700 000 blocs de la blockchain de Bitcoin de deux manières différentes. Surtout dans le cas de la compression de bloc par bloc, il est assez facile de remarquer la restriction des méthodes d'optimisation algorithmique puisque le processus appelant Dissolve est itératif et que lui même dans sa boucle pour ligne 7 est itératif et ne peut pas être multithreadé puisque l'éxécution d'un tour de boucle a des répercussions sur les suivants, la seule optimisation possible était de choisir au mieux les structures de données en analysant les répercussions d'un passage de boucle à l'autre et d'un appel à l'autre de cette fonction Dissolve. Il a notamment fallu comprendre précisément le format binaire des blocs. Au final l'algorithme mettait 24 heures à s'exécuter dans le cas de la compression bloc par bloc avec ce qui était déjà compressé. % 358 Go instead of blocks isn't accurate
+	% peut parler du problème de redémarrage de Windows cf 12/07/21 et du temps d'éxécution de l'algo ~24h pour les blocs un par un
+	
+	\newpage
+	
+	\section{Annexes}
+	
+	% could reverse first both (high level up, lower down) - let say no
+	
+	\defannexe{21}{tableauPage9.png}{Extrait du tableau page 9 de "Mining in Logarithmic Space" (BTC signifiant Bitcoin)}
+	\defannexe{22}{interlinkSet.png}{Ensemble de pointeurs de "Mining in Logarithmic Space" nécessaire à la bonne exécution de leur approche}
+	\defannexe{23}{hexaHashesStats.png}{Réparatition des hachés des blocs de Bitcoin par difficultée $m$ ($n$) où $m$ est le nombre de zéros héxadécimaux au début du haché et $n$ le nombre de hachés débutant précisément par $m$ zéros héxadécimaux}
+	\defannexe{24}{binHashesStats.png}{Réparatition des hachés des blocs de Bitcoin par difficultée $m$ ($n$) où $m$ est le nombre de zéros binaires au début du haché et $n$ le nombre de hachés débutant précisément par $m$ zéros binaires}
+	\defannexe{25}{piX.png}{Réparatition des hachés des blocs de Bitcoin, ici chaque bloc de $\pi\chi$ a une largeur de 1 pixel.\\}
+			% est-ce vraiment le temps en abscisse ? - théoriquement je crois
+	\defannexe{26}{algo1.png}{Algorithme 1 de "Mining in Logarithmic Space" permettant de compresser une blockchain.\\\\$C$ est la chaîne de blocs\\$C^*\uparrow^\mu$ désigne les blocs de niveau de difficulté exactement $\mu$ de $C^*$\\$C^*\uparrow^\mu\{b:\}$ désigne les blocs de $C^*\uparrow^\mu$ plus récents que le bloc $b$} % $m$ valant $3*k$ avec $k=6$\\
+	
+	\newpage
+	
+	\section{Sources}
+	
+	\noindent
+	\defsource{1}{Bitcoin: A peer-to-peer electronic cash system. 2008}{S. Nakamoto} % 9
+	\defsource{2}{The bitcoin backbone protocol: Analysis and applications (revised 2020)}{J. Garay, A. Kiayias, N. Leonardos} % 47
+	\defsourceURL{3}{\url{https://www.blockchain.com/charts/blocks-size}}
+	\defsource{4}{Mining in Logarithmic Space. 2021}{Aggelos Kiayias, Nikos Leonardos and Dionysis Zindros} % 38
+	\defsourceURL{5}{\url{https://www.blockchain.com/btc/blocks}}
+	\defsourceURL{6}{\url{https://en.bitcoin.it/wiki/Block}}
+	\defsource{7}{The bitcoin backbone protocol with chains of variable difficulty}{J. A. Garay, A. Kiayias, N. Leonardos} % 30
+	\defsourceURL{8}{\url{https://bitnodes.io/}}
+	\defsourceURL{9}{\url{https://en.bitcoin.it/wiki/Script}}
+	\defsourceURL{10}{\url{https://statoshi.info/d/000000009/unspent-transaction-output-set?orgId=1\&refresh=10m}}
+	\defsourceURL{11}{\url{https://github.com/Benjamin-Loison/Mining-in-Logarithmic-Space/blob/main/main.cpp}}
+	%\defsourceURL{12}{\url{https://www.statista.com/statistics/647523/worldwide-bitcoin-blockchain-size/}}
+	%\defsourceURL{12}{\url{https://btc.com/stats/diff}}
+	
+	\noindent
+	\defsource{12}{Permissionless Consensus based on Proof-of-Eligibility}{Geoffrey saunois, Frédérique Robin, Emmanuelle Anceaume, Bruno Sericola} % 13
+	\defsource{13}{StakeCube: Combining Sharding and Proof-of-Stake to build Fork-free Secure Permissionless Distributed Ledgers}{Antoine Durand, Emmanuelle Anceaume, Romaric Ludinard} % 16
+	\defsource{14}{Hybrid Mining}{Krishnendu Chatterjee, Amir Kafshdar Goharshady, Arash Pourdamghani} % 8
+	\defsource{15}{Proofs of Useful Work}{Marshall Ball, Alon Rosen, Manuel Sabin, Prashant Nalini Vasudevan} % 28
+	
+	\noindent
+	\defsource{16}{SoK: Research Perspectives and Challenges for Bitcoin and Cryptocurrencies}{Joseph Bonneau, Andrew Miller, Jeremy Clark, Arvind Narayanan, Joshua A. Kroll, Edward W. Felten} % 18
+	\defsource{17}{Which Abstractions for the Blockchain Technology}{Emmanuelle Anceaume} % 97 slides
+	\defsource{18}{Increasing the robustness of the Bitcoin crypto-system in presence of undesirable behaviours}{Thomas Lajoie-Mazenc} % 131
+	\defsource{19}{Non-Interactive Proofs of Proof-of-Work}{Aggelos Kiayias, Andrew Miller, Dionysis Zindros} % 42
+	\defsource{20}{Predicting Block Halving Party Times}{Meni Rosenfeld} % 8
+	
+	%\newpage
+	
+	\section{Remerciements}
+	
+	Je suis très content d'avoir pû traité cette thématique et d'avoir pû trouver un stage sur celle-ci. Cette thématique lie la cryptographie (avec principalement théoriquement les fonctions de hachage), l'architecture en réseau et l'architecture des données et la vérification des changements de ses données. Une problématique moderne pour obtenir des protocoles sûrs, légers et décentralisés pour partager des données représentant des faits réels.\\ % more ?
+	Je tiens à particulièrement remercier mon encadrante de stage Emmanuelle Anceaume du laboratoire IRISA qui a sû me diriger vers de bons articles décrivant l'état de l'art et a été attentive, disponible et à l'écoute. J'aimerais aussi remercier Romaric Ludinard qui s'est rendu disponible pour me donner quelques conseils sur la partie implémentation.
+	
+
+\end{document}
