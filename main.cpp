@@ -473,7 +473,7 @@ vector<BLOCK> uponNewBlockReceived(vector<BLOCK> pi, vector<BLOCK> XBis)
 			subPi.insert(subPi.end(), XBisFromB.begin(), XBisFromB.end());
 			pi = Compress(subPi);
 			// BROADCAST(Π)
-
+			
 		}
 	}
 
@@ -493,7 +493,6 @@ vector<BLOCK> getOnlyDistinctBlocks(vector<BLOCK>* blocks)
 	return distinctBlocks;
 }
 
-// j'ai honte ^^ mais bon au moins je suis sûr https://fr.wikipedia.org/wiki/Recherche_dichotomique#Pseudo-code
 unsigned int getBlocksIndexFromBAux(vector<BLOCK>* blocks, unsigned int bTimestamp, unsigned int lower, unsigned int upper/*, unsigned short calls*/) // O(log_2(n) * log_2(n) = 19.39 * 19.39 = 375.97)
 {
 	//print("gIBFBA: " + convertNbToStr(lower) + " " + convertNbToStr(upper));
@@ -511,7 +510,7 @@ unsigned int getBlocksIndexFromBAux(vector<BLOCK>* blocks, unsigned int bTimesta
 			m--;
 			if(m == -1)
 			{
-				//print("don't break my heart");
+				//print("don't break");
 				break;
 			}
 			timestamp = blocksTimestamps[blocks->at(lower + m)];
@@ -521,14 +520,14 @@ unsigned int getBlocksIndexFromBAux(vector<BLOCK>* blocks, unsigned int bTimesta
 		print("lower (" + convertNbToStr(lower) + ") m (" + convertNbToStr(m) + ") blocks->size() " + convertNbToStr(blocks->size()) + ")");
 		return lower + m + 1;
 	}
-	if(timestamp > bTimestamp) // https://youtu.be/pKEAjIpO_SY?t=77
+	if(timestamp > bTimestamp)
 	{
-		//print("un coup en haut");
+		//print("en haut");
 		return getBlocksIndexFromBAux(blocks, bTimestamp, lower, upper - m/* - 1*//*, calls + 1*/);
 	}
 	else
 	{
-		//print("un coup en bas");
+		//print("en bas");
 		return getBlocksIndexFromBAux(blocks, bTimestamp, lower + m/* + 1*/, upper/*, calls + 1*/);
 	}
 }
@@ -793,7 +792,7 @@ string getHoursMinutesSeconds(string hourMinuteSeparator, string minuteSecondSep
 		deltaStr = " (Δ = " + convertNbToStr(delta) + " ms)";
 
     time_t t = time(0);
-	if(t == ((time_t)-1)) realPrint("time failed !"); // used to be print lol #recursive
+	if(t == ((time_t)-1)) realPrint("time failed !"); // used to be print #recursive
     struct tm* now = localtime(&t);
 	if(now == NULL) realPrint("localtime failed !");
 
