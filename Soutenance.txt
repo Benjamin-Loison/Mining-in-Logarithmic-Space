@@ -1,0 +1,110 @@
+Introduction:
+-------------
+
+NEXT
+
+blockchain: technologie de stockage, rendu célèbre par S.N. avec Bitcoin 2008, monnaie virtuelle !décentralisée!,
+            modèle pair-à-pair, Garay 2014
+NEXT
+passage à l'échelle, cas particulier de Bitcoin: deux type d'utilisateur
+NEXT
+l'idée et source: 358 Go -> 4.3 Go soit 84 fois plus rapide
+
+Fonctionnement de Bitcoin:
+--------------------------
+
+NEXT
+blockchain: chaîne de blocs
+NEXT
+concensus avec problème cryptographique et difficulté (mises à jour) - démocratie sur internet basé sur la puissance de calcul de chacun (caractère aléatoire)
+par la suite on partitionne les blocs par le nombre de zéros
+participation car incitation en récompense monétaire en BTC
+NEXT
+problème du fork et 6 blocs de profondeur
+NEXT
+
+Déroulement:
+------------
+
+NEXT
+L'idée principale de notre approche:
+
+- réduire bande passante et espace disque, doit garder set d'UTXO et !certains blocs!
+- en théorie doit mettre set d'UTXO dans les blocs comme ça prend le 6ème en partant de la fin
+
+Les atouts de notre approche:
+
+application de la théorie à Bitcoin 2 atouts:
+explain n, \delta, c, a, k
+1. environ 4.24 Go au lieu des 358, a prépondérant, n = 695 590, c = 97, k = 6, delta entre 0 et 2 Mo, a = 4.24 Go
+2. SPV + confiance
+
+Les difficultés pour appliquer notre approche à Bitcoin:
+
+- problème de fluctuation de la difficulté:
+
+en théorie: !T! constant, hors change tous les 2 016 blocs dans Bitcoin si veut la compression optimale de la théorie doit adapter les preuves de l'article pour traier d'une difficulté variable. Après lecture, T = !T_0! beaucoup plus simple
+
+NEXT
+
+- l'interlink set:
+
+lien de chaque bloc de niveau j aux derniers blocs de chaque niveau inférieur à j qui le précède chronologiquement
+peut le générer: Bitcoin chaque bloc lié au précédent et en stockant l'ensemble des headers pesant 62 Mo
+
+Seul un nouveau protocole non rétro-compatible pour appliquer la théorie ?
+
+- la rétro-compatibilité:
+
+nécessaire
+-> autres hypothèses: haché majoritaire - coût réseau: handshake TCP ordre du Ko, 10 000 noeuds découverts -> complexité linéaire et notre approche favorise les nouveaux noeuds ? -> problème tant que peu de personne ont le nouveau protocole, seuls ces personnes constituent la majorité, cependant en passant au nouveau protocole ils peuvent vérifier la légitimité du haché majoritaire jusque là avec les données de l'ancien protocole et sinon "révoque" le nouveau haché
+
+La solution retenue:
+
+encadrante: coinbase, script, instruction OP_NOP suffisant
+
+Statistiques avant implémentation
+
+NEXT
+différence zéros héxa/bin
+NEXT
+pas d'arbre binaire - explain why
+NEXT
+
+Les résultats
+
+implémentation de l'algorithme 1 en 800 lignes de C++ de deux manières
+théorème 3 vérifié - why important
+NEXT
+compression résulte, en 2 065 blocs
+explain figure
+
+Le travail restant à faire pour concrétiser cette approche
+
+intégrer mon code à logiciel de minage et un de noeud complet
+miner un bloc pour initialiser nouveau protocole et initialisation rapide
+
+Evaluation de la contribution technique:
+----------------------------------------
+
+problème sécurité des 6 blocs
+
+Meta-information:
+-----------------
+
+L'état de l'art du domaine de la blockchain comme base de réflexion pour restreindre au cas du Bitcoin
+
+ensemble du stage de 6 semaines à distance
+pour statistiques et implémentation j'ai téléchargé la blockchain de Bitcoin
+
+La programmation
+
+j'ai programmé en Python ou C++ pour multithreading efficace, gestion précise de la mémoire pour stats et prétraitement
+problème d'optimisation -> choix des structures de données - au final 24h en mode bloc par bloc
+
+Remerciements:
+--------------
+
+je tiens à remercier mon encadrante Emmanuelle Anceaume du labo IRISA qui a su m'introduire efficacement au domaine avec des articles pertinents en plus de sa disponbibilité mais aussi Romaric Ludinard qui m'a donné quelques précieux conseils pour l'implémentation
+heureux d'avoir travaillé sur cette thématique liant la cryptographie, l'architecture en réseau, des données, la vérification des changements de celles-ci domaine moderne permet d'obtenir des protocoles sûrs, légers et décentralisés pour partager des données représentant des faits réels
+
