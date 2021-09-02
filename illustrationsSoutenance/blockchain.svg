@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="500.4184mm"
+   height="126.68742mm"
+   viewBox="0 0 500.4184 126.68742"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="blockchain.svg"
+   inkscape:export-filename="C:\Users\Benjamin\Desktop\BensFolder\School\ENS\Saclay\Stage\Emmanuelle Anceaume\Stage\important\illustrationsSoutenance\blockchain.png"
+   inkscape:export-xdpi="96.809998"
+   inkscape:export-ydpi="96.809998">
+  <defs
+     id="defs2">
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker2164"
+       refX="0.0"
+       refY="0.0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lstart">
+      <path
+         transform="scale(0.8) translate(12.5,0)"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         id="path2162" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lstart"
+       style="overflow:visible"
+       inkscape:isstock="true"
+       inkscape:collect="always">
+      <path
+         id="path938"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+         transform="scale(0.8) translate(12.5,0)" />
+    </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker2074"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend">
+      <path
+         inkscape:connector-curvature="0"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path2072" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lend-7"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path941-3"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="635.30957"
+     inkscape:cy="405.57605"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="2066"
+     inkscape:window-x="4789"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-150.1826,-59.454649)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="13.701636"
+       y="63.883183"
+       id="text823"><tspan
+         sodipodi:role="line"
+         id="tspan821"
+         x="13.701636"
+         y="73.246948"
+         style="stroke-width:0.26458332" /></text>
+    <rect
+       style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:2.50909042;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-7"
+       width="138.07634"
+       height="124.17834"
+       x="151.43715"
+       y="60.709194" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="202.78401"
+       y="73.332588"
+       id="text827-2"><tspan
+         sodipodi:role="line"
+         id="tspan825-0"
+         x="202.78401"
+         y="73.332588"
+         style="stroke-width:0.26458332">Bloc 0 </tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="155.36708"
+       y="86.977531"
+       id="text831-6"><tspan
+         sodipodi:role="line"
+         id="tspan829-3"
+         x="155.36708"
+         y="86.977531"
+         style="stroke-width:0.26458332">Alice gagne 5 BTC</tspan><tspan
+         sodipodi:role="line"
+         x="155.36708"
+         y="100.2067"
+         style="stroke-width:0.26458332"
+         id="tspan1357">Alice paie Bob 2 BTC</tspan><tspan
+         sodipodi:role="line"
+         x="155.36708"
+         y="113.43587"
+         style="stroke-width:0.26458332"
+         id="tspan1359">Alice paie Charlie 1 BTC</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="193.61836"
+       y="63.883183"
+       id="text823-4"><tspan
+         sodipodi:role="line"
+         id="tspan821-3"
+         x="193.61836"
+         y="73.246948"
+         style="stroke-width:0.26458332" /></text>
+    <rect
+       style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:2.50909042;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-7-5"
+       width="138.07634"
+       height="124.17834"
+       x="331.35376"
+       y="60.709194" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="382.7005"
+       y="73.332588"
+       id="text827-2-7"><tspan
+         sodipodi:role="line"
+         id="tspan825-0-9"
+         x="382.7005"
+         y="73.332588"
+         style="stroke-width:0.26458332">Bloc 1</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="335.28369"
+       y="86.977531"
+       id="text831-6-3"><tspan
+         sodipodi:role="line"
+         id="tspan829-3-9"
+         x="335.28369"
+         y="86.977531"
+         style="stroke-width:0.26458332">Charlie gagne 5 BTC</tspan><tspan
+         sodipodi:role="line"
+         x="335.28369"
+         y="100.2067"
+         style="stroke-width:0.26458332"
+         id="tspan934">Charlie paie Bob 3 BTC</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker2164)"
+       d="m 294.82142,120.86309 c 29.48215,0 29.48215,0 29.48215,0"
+       id="path936"
+       inkscape:connector-curvature="0" />
+    <rect
+       style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;stroke:#000000;stroke-width:2.50909042;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect815-7-5-0"
+       width="138.07634"
+       height="124.17834"
+       x="511.27011"
+       y="60.709194" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="562.61713"
+       y="73.332588"
+       id="text827-2-7-8"><tspan
+         sodipodi:role="line"
+         id="tspan825-0-9-3"
+         x="562.61713"
+         y="73.332588"
+         style="stroke-width:0.26458332">Bloc 2</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="515.20001"
+       y="86.977531"
+       id="text831-6-3-7"><tspan
+         sodipodi:role="line"
+         id="tspan829-3-9-1"
+         x="515.20001"
+         y="86.977531"
+         style="stroke-width:0.26458332">Alice gagne 5 BTC</tspan><tspan
+         sodipodi:role="line"
+         x="515.20001"
+         y="100.2067"
+         style="stroke-width:0.26458332"
+         id="tspan1363">Bob paie Charlie 2 BTC</tspan><tspan
+         sodipodi:role="line"
+         x="515.20001"
+         y="113.43587"
+         style="stroke-width:0.26458332"
+         id="tspan934-4">Bob paie Alice 1 BTC</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Arrow1Lstart)"
+       d="m 474.7382,120.86309 c 29.48215,0 29.48215,0 29.48215,0"
+       id="path936-6"
+       inkscape:connector-curvature="0" />
+  </g>
+</svg>
