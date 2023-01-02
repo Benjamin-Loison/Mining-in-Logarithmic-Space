@@ -27,48 +27,48 @@ string pathSeparatorStr = "/";
 
 int main()
 {
-	vector<string> files = listFiles(blocksFolder);
-	unsigned int filesSize = files.size();
-	for(unsigned int filesIndex = 0; filesIndex < filesSize; filesIndex++)
-	{
-		string file = files[filesIndex];
-		//print(file);
-		if(endsWith(file, ".dat"))
-		{
-			print(file);
-			
-			vector<string> lines = getFileContent("main.cpp"/*blocksFolder + file*/);
-			unsigned int linesSize = lines.size();
-			print("linesSize: " + convertNbToStr(linesSize));
-			for(unsigned int linesIndex = 0; linesIndex < linesSize; linesIndex++)
-			{
-				string line = lines[linesIndex];
-				print(convertNbToStr(linesIndex) + " " + line + " !");
-			}
+    vector<string> files = listFiles(blocksFolder);
+    unsigned int filesSize = files.size();
+    for(unsigned int filesIndex = 0; filesIndex < filesSize; filesIndex++)
+    {
+        string file = files[filesIndex];
+        //print(file);
+        if(endsWith(file, ".dat"))
+        {
+            print(file);
 
-			/*unsigned short magics[4];
-			FILE* f = fopen(file.c_str(), "rb");
-			if(f == NULL)
-			{
-				print("Failed to open file !");
-				return 1;
-			}
-			for(unsigned short i = 0; i < 40; i++)
-			{
-				//magics[i] = fgetc(f);
-				//print(convertNbToStr(i) + " " + convertNbToStr(magics[i]) + " !");
-				print(convertNbToStr(i) + " " + convertNbToStr(fgetc(f)) + " !");
-			}
-			fclose(f);*/
-		}
-	}
-	return 0;
+            vector<string> lines = getFileContent("main.cpp"/*blocksFolder + file*/);
+            unsigned int linesSize = lines.size();
+            print("linesSize: " + convertNbToStr(linesSize));
+            for(unsigned int linesIndex = 0; linesIndex < linesSize; linesIndex++)
+            {
+                string line = lines[linesIndex];
+                print(convertNbToStr(linesIndex) + " " + line + " !");
+            }
+
+            /*unsigned short magics[4];
+            FILE* f = fopen(file.c_str(), "rb");
+            if(f == NULL)
+            {
+            	print("Failed to open file !");
+            	return 1;
+            }
+            for(unsigned short i = 0; i < 40; i++)
+            {
+            	//magics[i] = fgetc(f);
+            	//print(convertNbToStr(i) + " " + convertNbToStr(magics[i]) + " !");
+            	print(convertNbToStr(i) + " " + convertNbToStr(fgetc(f)) + " !");
+            }
+            fclose(f);*/
+        }
+    }
+    return 0;
 }
 
 vector<string> getFileContent(string path)
 {
     vector<string> vec;
-	ifstream infile(path.c_str());
+    ifstream infile(path.c_str());
     string line;
     while(getline(infile, line))
         vec.push_back(line);
@@ -121,17 +121,17 @@ string replace(string subject, const string& search, const string& replace = "")
 
 vector<string> listFiles(string directory)
 {
-	vector<string> files;
+    vector<string> files;
     listFiles(directory, &files);
-	unsigned int filesSize = files.size();
-	for(unsigned int filesIndex = 0; filesIndex < filesSize; filesIndex++)
-	{
-		files[filesIndex] = replace(files[filesIndex], directory);
-	}
+    unsigned int filesSize = files.size();
+    for(unsigned int filesIndex = 0; filesIndex < filesSize; filesIndex++)
+    {
+        files[filesIndex] = replace(files[filesIndex], directory);
+    }
     return files;
 }
 
 void print(string s)
 {
-	cout << s << endl;
+    cout << s << endl;
 }
